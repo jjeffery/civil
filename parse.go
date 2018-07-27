@@ -1,4 +1,4 @@
-package local
+package civil
 
 import (
 	"errors"
@@ -87,26 +87,26 @@ func init() {
 	}
 }
 
-// DateParseLayout parses a formatted string and returns the date value it represents.
-// The layout is based on the standard library time package and for local dates the reference is
+// ParseDateLayout parses a formatted string and returns the date value it represents.
+// The layout is based on the standard library time package and for civil dates the reference is
 //  Mon Jan 2 2006
 // If the layout contains time or timezone fields, they are parsed and discarded.
-func DateParseLayout(layout, value string) (Date, error) {
+func ParseDateLayout(layout, value string) (Date, error) {
 	t, err := time.Parse(layout, value)
 	if err != nil {
 		return Date{}, err
 	}
-	return DateFromTime(t), nil
+	return DateOf(t), nil
 }
 
-// DateParse attempts to parse a string into a local date. Leading
+// ParseDate attempts to parse a string into a civil date. Leading
 // and trailing space and quotation marks are ignored. The following
 // date formates are recognized: yyyy-mm-dd, yyyymmdd, yyyy.mm.dd,
 // yyyy/mm/dd, yyyy-ddd, yyyyddd.
 //
-// DateParse is used to parse dates where no layout is provided, for example
+// ParseDate is used to parse dates where no layout is provided, for example
 // when marshaling and unmarshaling JSON and XML.
-func DateParse(s string) (Date, error) {
+func ParseDate(s string) (Date, error) {
 	s = strings.Trim(s, " \t\"'")
 	for _, regexp := range parseRegexp.calendarDates {
 		match := regexp.FindStringSubmatch(s)
@@ -135,24 +135,24 @@ func DateParse(s string) (Date, error) {
 	return Date{}, errInvalidDateFormat
 }
 
-// DateTimeParseLayout parses a formatted string and returns the date value it represents.
-// The layout is based on the standard library time package and for local date-times the reference is
+// ParseDateTimeLayout parses a formatted string and returns the date value it represents.
+// The layout is based on the standard library time package and for civil date-times the reference is
 //  Mon Jan 2 2006 15:04:05
 // If the layout contains a timezone field, it is parsed and discarded.
-func DateTimeParseLayout(layout, value string) (DateTime, error) {
+func ParseDateTimeLayout(layout, value string) (DateTime, error) {
 	t, err := time.Parse(layout, value)
 	if err != nil {
 		return DateTime{}, err
 	}
-	return DateTimeFromTime(t), nil
+	return DateTimeOf(t), nil
 }
 
-// DateTimeParse attempts to parse a string into a local date-time. Leading
+// ParseDateTime attempts to parse a string into a civil date-time. Leading
 // and trailing space and quotation marks are ignored. The following
 // date formates are recognized: yyyy-mm-dd, yyyymmdd, yyyy.mm.dd,
 // yyyy/mm/dd, yyyy-ddd, yyyyddd. The following time formats are recognized:
 // HH:MM:SS, HH:MM, HHMMSS, HHMM.
-func DateTimeParse(s string) (DateTime, error) {
+func ParseDateTime(s string) (DateTime, error) {
 	s = strings.Trim(s, " \t\"'")
 	for _, regexp := range parseRegexp.calendarDateTimes {
 		match := regexp.FindStringSubmatch(s)

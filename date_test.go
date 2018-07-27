@@ -1,4 +1,4 @@
-package local
+package civil
 
 import (
 	"encoding/xml"
@@ -79,7 +79,7 @@ func CheckLocalDate(t *testing.T, date Date, year, month, day int) {
 
 	assert.Equal(text, date.String())
 
-	if date2, err := DateParse(text); err != nil || !date.Equal(date2) {
+	if date2, err := ParseDate(text); err != nil || !date.Equal(date2) {
 		if err != nil {
 			t.Errorf("DateParse: %s: unexpected error: %v", text, err)
 		} else {
@@ -219,7 +219,7 @@ func TestParseDate(t *testing.T) {
 		for _, suffix := range []string{"", "T00:00:00Z", "T00:00:00", "T00:00:00+10:000", "T000000+0900"} {
 			baseText := tc.Text + suffix
 			for _, text := range []string{baseText, " \t" + baseText + "\t\t "} {
-				ld, err := DateParse(text)
+				ld, err := ParseDate(text)
 				if tc.Valid {
 					assert.NoError(err, text)
 					assert.Equal(tc.Day, ld.Day())
@@ -368,7 +368,7 @@ func TestValue(t *testing.T) {
 }
 
 func mustParseDate(s string) Date {
-	d, err := DateParse(s)
+	d, err := ParseDate(s)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -536,7 +536,7 @@ func TestDateParseLayout(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		d, err := DateParseLayout(tc.Layout, tc.Text)
+		d, err := ParseDateLayout(tc.Layout, tc.Text)
 		if tc.Error {
 			assert.Error(err)
 		} else {

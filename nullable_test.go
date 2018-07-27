@@ -1,4 +1,4 @@
-package local
+package civil
 
 import (
 	"encoding/json"
@@ -34,7 +34,7 @@ func TestNullDateScan(t *testing.T) {
 		},
 		{
 			Input:         24,
-			ExpectedError: "cannot convert to local.Date",
+			ExpectedError: "cannot convert to civil.Date",
 		},
 		{
 			Input:        nil,
@@ -170,7 +170,7 @@ func TestNullDateTimeScan(t *testing.T) {
 		},
 		{
 			Input:         24,
-			ExpectedError: "cannot convert to local.DateTime",
+			ExpectedError: "cannot convert to civil.DateTime",
 		},
 		{
 			Input:            nil,

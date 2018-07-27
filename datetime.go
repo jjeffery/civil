@@ -1,4 +1,4 @@
-package local
+package civil
 
 import (
 	"database/sql/driver"
@@ -27,22 +27,22 @@ type DateTime struct {
 	t time.Time
 }
 
-// After reports whether the local date-time d is after e
+// After reports whether the civil date-time d is after e
 func (dt DateTime) After(e DateTime) bool {
 	return dt.t.After(e.t)
 }
 
-// Before reports whether the local date-time d is before e
+// Before reports whether the civil date-time d is before e
 func (dt DateTime) Before(e DateTime) bool {
 	return dt.t.Before(e.t)
 }
 
-// Equal reports whether dt and e represent the same local date-time.
+// Equal reports whether dt and e represent the same civil date-time.
 func (dt DateTime) Equal(e DateTime) bool {
 	return dt.t.Equal(e.t)
 }
 
-// IsZero reports whether dt represents the zero local date-time,
+// IsZero reports whether dt represents the zero civil date-time,
 // Midnight, January 1, year 1.
 func (dt DateTime) IsZero() bool {
 	return dt.t.IsZero()
@@ -124,7 +124,7 @@ func (dt DateTime) YearDay() int {
 	return dt.t.YearDay()
 }
 
-// Add returns the local date-time d + duration.
+// Add returns the civil date-time d + duration.
 func (dt DateTime) Add(duration time.Duration) DateTime {
 	t := dt.t.Add(toSeconds(duration))
 	return DateTime{t: t}
@@ -138,7 +138,7 @@ func (dt DateTime) Sub(e DateTime) time.Duration {
 	return dt.t.Sub(e.t)
 }
 
-// AddDate returns the local date-time corresponding to adding the given number of years,
+// AddDate returns the civil date-time corresponding to adding the given number of years,
 // months, and days to t. For example, AddDate(-1, 2, 3) applied to January 1, 2011
 // returns March 4, 2010.
 //
@@ -156,7 +156,7 @@ func toLocalDateTime(t time.Time) DateTime {
 	return DateTimeFor(y, m, d, hour, minute, second)
 }
 
-// Now returns the current local date-time.
+// Now returns the current civil date-time.
 func Now() DateTime {
 	return toLocalDateTime(time.Now())
 }
@@ -172,8 +172,8 @@ func DateTimeFor(year int, month time.Month, day int, hour int, minute int, seco
 	}
 }
 
-// DateTimeFromTime returns the DateTime corresponding to t.
-func DateTimeFromTime(t time.Time) DateTime {
+// DateTimeOf returns the DateTime corresponding to t in t's location.
+func DateTimeOf(t time.Time) DateTime {
 	year, month, day := t.Date()
 	hour, minute, second := t.Clock()
 	return DateTimeFor(year, month, day, hour, minute, second)
@@ -188,7 +188,7 @@ func (dt DateTime) Format(layout string) string {
 }
 
 // String returns a string representation of d. The date
-// format returned is compatible with ISO 8601: yyyy-mm-dd.
+// format returned is compatible with ISO 8601: yyyy-mm-ddTHH:MM:SS.
 func (dt DateTime) String() string {
 	return localDateTimeString(dt)
 }
@@ -220,12 +220,12 @@ func (dt *DateTime) UnmarshalBinary(data []byte) error {
 	if err := t.UnmarshalBinary(data); err != nil {
 		return err
 	}
-	*dt = DateTimeFromTime(t)
+	*dt = DateTimeOf(t)
 	return nil
 }
 
 // MarshalJSON implements the json.Marshaler interface.
-// The date is a quoted string in an ISO 8601 format (yyyy-mm-dd).
+// The date is a quoted string in an ISO 8601 format (yyyy-mm-ddTHH:MM:SS).
 func (dt DateTime) MarshalJSON() ([]byte, error) {
 	return []byte(localDateQuotedString(dt)), nil
 }
@@ -235,7 +235,7 @@ func (dt DateTime) MarshalJSON() ([]byte, error) {
 // format (calendar or ordinal).
 func (dt *DateTime) UnmarshalJSON(data []byte) (err error) {
 	s := string(data)
-	*dt, err = DateTimeParse(s)
+	*dt, err = ParseDateTime(s)
 	return
 }
 
@@ -249,7 +249,7 @@ func (dt DateTime) MarshalText() ([]byte, error) {
 // The date is expected to an ISO 8601 format (calendar or ordinal).
 func (dt *DateTime) UnmarshalText(data []byte) (err error) {
 	s := string(data)
-	*dt, err = DateTimeParse(s)
+	*dt, err = ParseDateTime(s)
 	return
 }
 
@@ -258,7 +258,7 @@ func (dt *DateTime) Scan(src interface{}) error {
 	switch v := src.(type) {
 	case string:
 		{
-			d1, err := DateTimeParse(v)
+			d1, err := ParseDateTime(v)
 			if err != nil {
 				return err
 			}
@@ -266,7 +266,7 @@ func (dt *DateTime) Scan(src interface{}) error {
 		}
 	case []byte:
 		{
-			d1, err := DateTimeParse(string(v))
+			d1, err := ParseDateTime(string(v))
 			if err != nil {
 				return err
 			}
@@ -274,13 +274,13 @@ func (dt *DateTime) Scan(src interface{}) error {
 		}
 	case time.Time:
 		{
-			d1 := DateTimeFromTime(v)
+			d1 := DateTimeOf(v)
 			*dt = d1
 		}
 	case nil:
 		*dt = DateTime{}
 	default:
-		return errors.New("cannot convert to local.DateTime")
+		return errors.New("cannot convert to civil.DateTime")
 	}
 	return nil
 }

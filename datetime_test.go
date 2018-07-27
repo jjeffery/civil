@@ -1,4 +1,4 @@
-package local
+package civil
 
 import (
 	"encoding/xml"
@@ -95,7 +95,7 @@ func CheckLocalDateTime(t *testing.T, datetime DateTime, year, month, day, hour,
 
 	assert.Equal(text, datetime.String())
 
-	datetime2, err := DateTimeParse(text)
+	datetime2, err := ParseDateTime(text)
 	assert.NoError(err)
 	assert.True(datetime.Equal(datetime2))
 
@@ -300,7 +300,7 @@ func TestParseDateDateTime(t *testing.T) {
 
 	for _, tc := range testCases {
 		for _, text := range []string{tc.Text, " \t\t" + tc.Text + "\t\t\t "} {
-			ld, err := DateTimeParse(text)
+			ld, err := ParseDateTime(text)
 			if tc.Valid {
 				assert.NoError(err, text)
 				year, month, day, hour, minute, second := ld.DateTime()
@@ -457,7 +457,7 @@ func TestDateTimeValue(t *testing.T) {
 }
 
 func mustParseDateTime(s string) DateTime {
-	dt, err := DateTimeParse(s)
+	dt, err := ParseDateTime(s)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -638,7 +638,7 @@ func TestDateTimeParseLayout(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		d, err := DateTimeParseLayout(tc.Layout, tc.Text)
+		d, err := ParseDateTimeLayout(tc.Layout, tc.Text)
 		if tc.Error {
 			assert.Error(err)
 		} else {

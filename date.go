@@ -1,4 +1,4 @@
-package local
+package civil
 
 import (
 	"database/sql/driver"
@@ -17,22 +17,22 @@ type Date struct {
 	t time.Time
 }
 
-// After reports whether the local date d is after e.
+// After reports whether the civil date d is after e.
 func (d Date) After(e Date) bool {
 	return d.t.After(e.t)
 }
 
-// Before reports whether the local date d is before e.
+// Before reports whether the civil date d is before e.
 func (d Date) Before(e Date) bool {
 	return d.t.Before(e.t)
 }
 
-// Equal reports whether d and e represent the same local date.
+// Equal reports whether d and e represent the same civil date.
 func (d Date) Equal(e Date) bool {
 	return d.t.Equal(e.t)
 }
 
-// IsZero reports whether d represents the zero local date,
+// IsZero reports whether d represents the zero civil date,
 // January 1, year 1.
 func (d Date) IsZero() bool {
 	return d.t.IsZero()
@@ -84,7 +84,7 @@ func (d Date) YearDay() int {
 	return d.t.YearDay()
 }
 
-// Add returns the local date d + duration.
+// Add returns the civil date d + duration.
 func (d Date) Add(duration time.Duration) Date {
 	t := d.t.Add(toDays(duration))
 	return Date{t: t}
@@ -98,7 +98,7 @@ func (d Date) Sub(e Date) time.Duration {
 	return d.t.Sub(e.t)
 }
 
-// AddDate returns the local date corresponding to adding the given number of years,
+// AddDate returns the civil date corresponding to adding the given number of years,
 // months, and days to t. For example, AddDate(-1, 2, 3) applied to January 1, 2011
 // returns March 4, 2010.
 //
@@ -115,7 +115,7 @@ func toLocalDate(t time.Time) Date {
 	return DateFor(y, m, d)
 }
 
-// Today returns the current local date.
+// Today returns the current civil date.
 func Today() Date {
 	return toLocalDate(time.Now())
 }
@@ -131,8 +131,8 @@ func DateFor(year int, month time.Month, day int) Date {
 	}
 }
 
-// DateFromTime returns the Date corresponding to t.
-func DateFromTime(t time.Time) Date {
+// DateOf returns the Date corresponding to t in t's location.
+func DateOf(t time.Time) Date {
 	year, month, day := t.Date()
 	return DateFor(year, month, day)
 }
@@ -178,7 +178,7 @@ func (d *Date) UnmarshalBinary(data []byte) error {
 	if err := t.UnmarshalBinary(data); err != nil {
 		return err
 	}
-	*d = DateFromTime(t)
+	*d = DateOf(t)
 	return nil
 }
 
@@ -193,7 +193,7 @@ func (d Date) MarshalJSON() ([]byte, error) {
 // format (calendar or ordinal).
 func (d *Date) UnmarshalJSON(data []byte) (err error) {
 	s := string(data)
-	*d, err = DateParse(s)
+	*d, err = ParseDate(s)
 	return
 }
 
@@ -207,7 +207,7 @@ func (d Date) MarshalText() ([]byte, error) {
 // The date is expected to an ISO 8601 format (calendar or ordinal).
 func (d *Date) UnmarshalText(data []byte) (err error) {
 	s := string(data)
-	*d, err = DateParse(s)
+	*d, err = ParseDate(s)
 	return
 }
 
@@ -216,7 +216,7 @@ func (d *Date) Scan(src interface{}) error {
 	switch v := src.(type) {
 	case string:
 		{
-			d1, err := DateParse(v)
+			d1, err := ParseDate(v)
 			if err != nil {
 				return err
 			}
@@ -224,7 +224,7 @@ func (d *Date) Scan(src interface{}) error {
 		}
 	case []byte:
 		{
-			d1, err := DateParse(string(v))
+			d1, err := ParseDate(string(v))
 			if err != nil {
 				return err
 			}
@@ -232,13 +232,13 @@ func (d *Date) Scan(src interface{}) error {
 		}
 	case time.Time:
 		{
-			d1 := DateFromTime(v)
+			d1 := DateOf(v)
 			*d = d1
 		}
 	case nil:
 		*d = Date{}
 	default:
-		return errors.New("cannot convert to local.Date")
+		return errors.New("cannot convert to civil.Date")
 	}
 	return nil
 }
