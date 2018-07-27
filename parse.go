@@ -101,7 +101,7 @@ func ParseDateLayout(layout, value string) (Date, error) {
 
 // ParseDate attempts to parse a string into a civil date. Leading
 // and trailing space and quotation marks are ignored. The following
-// date formates are recognized: yyyy-mm-dd, yyyymmdd, yyyy.mm.dd,
+// date formats are recognized: yyyy-mm-dd, yyyymmdd, yyyy.mm.dd,
 // yyyy/mm/dd, yyyy-ddd, yyyyddd.
 //
 // ParseDate is used to parse dates where no layout is provided, for example
@@ -149,7 +149,7 @@ func ParseDateTimeLayout(layout, value string) (DateTime, error) {
 
 // ParseDateTime attempts to parse a string into a civil date-time. Leading
 // and trailing space and quotation marks are ignored. The following
-// date formates are recognized: yyyy-mm-dd, yyyymmdd, yyyy.mm.dd,
+// date formats are recognized: yyyy-mm-dd, yyyymmdd, yyyy.mm.dd,
 // yyyy/mm/dd, yyyy-ddd, yyyyddd. The following time formats are recognized:
 // HH:MM:SS, HH:MM, HHMMSS, HHMM.
 func ParseDateTime(s string) (DateTime, error) {
