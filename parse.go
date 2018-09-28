@@ -37,7 +37,7 @@ var parseFormats = struct {
 		`(\d{2})(\d{2})`,
 	},
 	throwAwayTimes: []string{
-		`(T[0-9:.zZ+-]*)?`,
+		`(\s*T?[0-9:.zZ+-]*)?`,
 	},
 }
 

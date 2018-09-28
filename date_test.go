@@ -213,20 +213,33 @@ func TestParseDate(t *testing.T) {
 			Year:  2195,
 		},
 	}
-	assert := assert.New(t)
 
-	for _, tc := range testCases {
-		for _, suffix := range []string{"", "T00:00:00Z", "T00:00:00", "T00:00:00+10:000", "T000000+0900"} {
+	throwAwayTimes := []string{
+		"", "T00:00:00Z", "T00:00:00", "T00:00:00+10:000", "T000000+0900",
+		" 00:00:00Z", " 00:00:00", " 00:00:00+10:00", " 00:00:00.0",
+	}
+
+	for tn, tc := range testCases {
+		for _, suffix := range throwAwayTimes {
 			baseText := tc.Text + suffix
 			for _, text := range []string{baseText, " \t" + baseText + "\t\t "} {
 				ld, err := ParseDate(text)
 				if tc.Valid {
-					assert.NoError(err, text)
-					assert.Equal(tc.Day, ld.Day())
-					assert.Equal(tc.Month, ld.Month())
-					assert.Equal(tc.Year, ld.Year())
+					if err != nil {
+						t.Errorf("%d: %s: %v", tn, baseText, err)
+						continue
+					}
+					if got, want := ld.Day(), tc.Day; got != want {
+						t.Errorf("%d: got=%v, want=%v, text=%v", tn, got, want, text)
+					}
+					if got, want := ld.Month(), tc.Month; got != want {
+						t.Errorf("%d: got=%v, want=%v, text=%v", tn, got, want, text)
+					}
+					if got, want := ld.Year(), tc.Year; got != want {
+						t.Errorf("%d: got=%v, want=%v, text=%v", tn, got, want, text)
+					}
 				} else {
-					assert.Error(err, text)
+					wantError(t, err)
 				}
 			}
 		}
@@ -548,4 +561,18 @@ func TestDateParseLayout(t *testing.T) {
 
 func datesNotEqual(expected, actual Date) string {
 	return fmt.Sprintf("%s vs %s", expected.String(), actual.String())
+}
+
+func wantNoError(t *testing.T, err error) {
+	t.Helper()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func wantError(t *testing.T, err error) {
+	t.Helper()
+	if err == nil {
+		t.Fatal("expected error")
+	}
 }
